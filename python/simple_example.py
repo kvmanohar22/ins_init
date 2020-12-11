@@ -1,9 +1,12 @@
 #!/usr/bin/python3
 
+from matplotlib import rc
 import matplotlib.pyplot as plt
 import numpy as np
 from numpy.random import normal as N
-plt.style.use('ggplot')
+
+rc('font', **{'family':'serif', 'serif':['Cardo']})
+rc('text', usetex=True)
 
 def state_propagation(x, phi):
     return phi @ x
@@ -37,9 +40,9 @@ def plot(t_, bias, sx, sv, sb):
 def test():
     dt = 1.0
     dt2 = dt*dt
-    phi = np.array([[1., dt, -dt2/2],
-                    [0., 1., -dt],
-                    [0., 0.,  1.]])
+    phi = np.array([[1., dt, dt2/2],
+                    [0., 1., dt],
+                    [0., 0., 1.]])
     P = np.diag([1., 1., 1.])
     G = np.array([[0., 0.],
                   [1., 0.],
@@ -61,7 +64,7 @@ def test():
     x_k = 0.0
     v_k = 0.0
 
-    # tracked position and velocity (actual nominal state of the system
+    # tracked position and velocity (actual nominal state of the system)
     e_x_k = 0.0
     e_v_k = 0.0
     e_b_k = 0.0
@@ -71,7 +74,7 @@ def test():
     t_ = [0.]
     sx, sv, sb = [1.], [1.], [1.]
 
-    imax = 30
+    imax = 100
     for i in range(1, imax):
         t = t + dt
 
@@ -80,19 +83,24 @@ def test():
         v_k = v_k + (a + b) * dt
 
         # nominal state prediction
-        e_x_k = e_x_k + e_v_k * dt + 0.5 * (a - e_b_k) * dt2
-        e_v_k = e_v_k + (a - e_b_k) * dt
+        e_x_k = e_x_k + e_v_k * dt + 0.5 * (a + e_b_k) * dt2
+        e_v_k = e_v_k + (a + e_b_k) * dt
         e_b_k = e_b_k
 
-        # error state prediction predict
+        # error state prediction
         x, P = predict(x, phi, P, G, Q)
 
         # update every 3s
         if i % 3 == 0:
             # 1. error in observation 
-            e = np.array([[x_k - e_x_k]])
+            
+            # positional observation has noise
+            z = x_k + N(0, np.sqrt(R)) 
 
-            # 2. update the system 
+            # compute the observation error
+            e = z - e_x_k
+
+            # 2. update the system
             x, P = update(x, P, e, R, H)
 
             # 3. close the loop
@@ -110,7 +118,6 @@ def test():
         t_.append(t)
 
         print('Step = {:2d}/{:2d}:\t bias = '.format(i, imax-1), e_b_k)
-        print('-'*50)
     plot(t_, bias, sx, sv, sb)
 
 if __name__ == '__main__':
