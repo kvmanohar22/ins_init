@@ -23,17 +23,16 @@ I have tested this on Arch Linux and should run out of the box on any Linux base
 ```
 
 - Usage
-  This repository can either be used as standalone package or as part of ROS. The input to the system in either case is stream of IMU (3 accelerometers, 3 gyroscopes) data. All the data used in this reposity has been generated using pixhawk flight controller 2.4.6.
 
-  - Stanadalone package
-    Sample data is provided under `assets/imu_*.txt` 
+  This repository can either be used as standalone package or as part of ROS. The input to the system in either case is stream of IMU (3 accelerometers, 3 gyroscopes) data. All the data used in this repository has been generated using pixhawk flight controller 2.4.6.
+
+  - **Stanadalone package**: Sample data is provided under `assets/imu_*.txt` 
   ```bash
     cd ins_init  
     ./bin/ins_init /path/to/txt/file 
   ```
 
-  - ROS package
-    Sample data is provided under `assets/imu_*.bag` 
+  - **ROS package**: Sample data is provided under `assets/imu_*.bag` 
   ```bash
     rosrun ins_init ins_init bag_path:=/path/to/bag
   ```
@@ -45,9 +44,9 @@ I have tested this on Arch Linux and should run out of the box on any Linux base
 
   if you have live stream of data (you might want to change ROS topic names in `launch/ins_init_stream.launch` file,
 
-  **NOTE**: The sensor has to be kept static during initialization.
-
   ```bash
     roslaunch ins_init ins_init_stream.launch
   ```
+
+  **NOTE**: The sensor has to be kept static during initialization.
 
