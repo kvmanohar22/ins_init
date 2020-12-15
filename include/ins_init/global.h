@@ -2,7 +2,7 @@
 #define _INS_INIT_GLOBAL_H_
 
 #include <Eigen/StdVector>
-#include <Eigen/src/Core/Matrix.h>
+#include <Eigen/Dense>
 
 #include <cassert>
 #include <string>
@@ -22,6 +22,9 @@ namespace ins_init
 
   typedef Eigen::Matrix<double, 3, 3> Matrix3d;
   typedef Eigen::Matrix<double, 3, 1> Vector3d;
+
+  typedef Eigen::Matrix<double, Eigen::Dynamic, 1> VectorNd;
+  typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> MatrixNd;
 
 } // namespace ins_init
 
