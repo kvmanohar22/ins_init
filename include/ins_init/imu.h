@@ -15,12 +15,19 @@ public:
   Vector3d acc_;    //!< accelerometer data
   double   t_;      //!< timestamp
 
+  ImuPacket()
+  {
+    gyr_.setZero();
+    acc_.setZero();
+    t_ = 0.0; 
+  }
+
   ImuPacket(const Vector3d& gyr, const Vector3d& acc, double t)
     : gyr_(gyr),
       acc_(acc),
       t_(t)
   {}
-  virtual ~ImuPacket();
+  virtual ~ImuPacket() {}
 
 }; // class ImuPacket
 
