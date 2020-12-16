@@ -27,6 +27,6 @@ ADD_LIBRARY(ins_init SHARED
 )
 TARGET_LINK_LIBRARIES(ins_init ${LIBS})
 
-ADD_EXECUTABLE(test_ins_init test/test_ins_init.cpp)
-TARGET_LINK_LIBRARIES(test_ins_init ins_init)
+ADD_EXECUTABLE(test_ins_init_acc test/test_ins_init_acc.cpp)
+TARGET_LINK_LIBRARIES(test_ins_init_acc ins_init)
 

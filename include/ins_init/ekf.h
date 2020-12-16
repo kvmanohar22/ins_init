@@ -40,22 +40,23 @@ public:
   virtual VectorNd getObservationError(const VectorNd& z) =0;
 
   /// Needs to be implemented. Either discrete/continuous propagation of covariance
-  virtual void update(const VectorNd& obs_error) =0;
+  virtual void update(const double t, const VectorNd& obs_error) =0;
 
 protected:
   size_t dim_x_;  //!< dimension of state 
   size_t dim_w_;  //!< dimension of noise 
   size_t dim_z_;  //!< dimension of observations 
   double t_;      //!< current time
+  double t0_;     //!< initial time
 
   VectorNd x_;    //!< state of the system
   MatrixNd P_;    //!< covariance of state of the system
-
   MatrixNd F_;    //!< coefficient of state of the system 
   MatrixNd G_;    //!< coefficient of (white) noise terms
   MatrixNd H_;    //!< (linearized) measurement function
   MatrixNd Q_;    //!< covariance matrix of state propagation
   MatrixNd R_;    //!< covariance matrix of measurement
+  MatrixNd P0_;   //!< initial covariance matrix
 }; // class EKF
 
 } // namespace ins_init
