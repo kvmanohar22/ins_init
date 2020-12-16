@@ -12,10 +12,10 @@ SET(CMAKE_CXX_FLAGS "-Wall -g -Wno-unused-variable -Wno-unused-but-set-variable 
 FIND_PACKAGE(Eigen3 REQUIRED)
 
 IF(USE_ROS)
-  FIND_PACKAGE(catkin REQUIRED COMPONENTS roscpp std_msgs)
+  FIND_PACKAGE(catkin REQUIRED COMPONENTS roscpp std_msgs sensor_msgs)
   catkin_package(
     DEPENDS Eigen3
-    CATKIN_DEPENDS roscpp std_msgs
+    CATKIN_DEPENDS roscpp std_msgs sensor_msgs
     INCLUDE_DIRS include
     LIBRARIES ins_init
   )
@@ -34,10 +34,15 @@ LIST(APPEND SRCS
   src/ekf.cpp
 )
 
+IF(USE_ROS)
+  INCLUDE_DIRECTORIES(${catkin_INCLUDE_DIRS})
+  LIST(APPEND LINK_LIBS ${catkin_LIBRARIES})
+ENDIF()
+
 ADD_LIBRARY(ins_init SHARED
   ${SRCS}
 )
-TARGET_LINK_LIBRARIES(ins_init ${LIBS})
+TARGET_LINK_LIBRARIES(ins_init ${LINK_LIBS})
 
 ADD_EXECUTABLE(test_ins_init_acc test/test_ins_init_acc.cpp)
 TARGET_LINK_LIBRARIES(test_ins_init_acc ins_init)
