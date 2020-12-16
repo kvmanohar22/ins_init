@@ -5,10 +5,10 @@ For mathematical treatment of the problem, head over to [blog post](https://kvma
 
 ## Dependencies
 - Eigen 3.4+
+- ROS melodic
 - numpy (optional)
 - matplotlib (optional)
 - python3 (optional)
-- ROS melodic (optional)
 
 ## Usage
 I have tested this on Arch Linux and should run out of the box on any Linux based distribution. Feel free to open an issue if faced with any problem.
