@@ -42,7 +42,8 @@ public:
     const double g2 = G*G; 
     P_(0,0) = (R_(0,0)/(g2*delta_t/dt))*(1.0/(1.0 + (R_(0,0)*dt)/(g2*delta_t*P0_(0,0))));
     P_(1,1) = (R_(1,1)/(g2*delta_t/dt))*(1.0/(1.0 + (R_(1,1)*dt)/(g2*delta_t*P0_(1,1))));
- 
+    P_(2,2) = P0_(2,2);
+
     // kalman gain 
     MatrixNd K(dim_x_, dim_z_);
     K = P_*H_.transpose()*(R_ + H_*P_*H_.transpose()).inverse(); 
