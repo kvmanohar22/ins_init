@@ -1,6 +1,7 @@
 #include "ins_init/coarse_init.h"
 #include "ins_init/fine_init_acc.h"
 #include "ins_init/imu.h"
+#include "ins_init/utils.h"
 
 #include <ros/init.h>
 #include <ros/node_handle.h>
@@ -71,6 +72,7 @@ void TestInsInitAccObs::feedImu(const ImuPacket& packet)
     {
       ROS_DEBUG_STREAM("Coarse init done.");
       R_n_b_ = coarse_init_->getR();
+      ROS_DEBUG_STREAM("Estimated RPY (degree) = " << dcm2rpy(R_n_b_).transpose()*180.0/PI);
     }
   }
 
