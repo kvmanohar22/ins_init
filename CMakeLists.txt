@@ -30,7 +30,6 @@ INCLUDE_DIRECTORIES(
 )
 
 LIST(APPEND SRCS
-  src/coarse_init.cpp
   src/ekf.cpp
 )
 

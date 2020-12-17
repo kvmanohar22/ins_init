@@ -1,6 +1,5 @@
 #include "ins_init/coarse_init.h"
 #include "ins_init/fine_init_acc.h"
-#include "ins_init/reader.h"
 #include "ins_init/imu.h"
 
 #include <ros/init.h>
@@ -18,7 +17,7 @@ class TestInsInitAccObs
 {
 public:
   TestInsInitAccObs(ros::NodeHandle& nh);
-  virtual ~TestInsInitAccObs() {}
+  virtual ~TestInsInitAccObs();
 
   // ROS callback function for imu messages
   void imuCb(const sensor_msgs::Imu::ConstPtr& msg);
@@ -30,11 +29,12 @@ public:
   inline ros::Rate rate() const { return rate_; }
 
 private:
-  Matrix3d          R_;        //!< Estimated DCM
+  Matrix3d          R_n_b_;       //!< Estimated rotation matrix from (b)ody frame to (n)ED frame
   ros::NodeHandle   nh_;
   ros::Subscriber   imu_sub_; 
-  bool              quit_;     //!< set to true to quit the loop
+  bool              quit_;        //!< set to true to quit the loop
   ros::Rate         rate_;
+  CoarseInit*       coarse_init_;
 }; // class TestInsInitAccObs
 
 TestInsInitAccObs::TestInsInitAccObs(ros::NodeHandle& nh)
@@ -43,6 +43,12 @@ TestInsInitAccObs::TestInsInitAccObs(ros::NodeHandle& nh)
     rate_(1000)
 {
   imu_sub_ = nh_.subscribe("/mavros/imu/data_raw", 1000, &TestInsInitAccObs::imuCb, this);
+  coarse_init_ = new CoarseInit(60.0);
+}
+
+TestInsInitAccObs::~TestInsInitAccObs()
+{
+  delete coarse_init_;
 }
 
 void TestInsInitAccObs::imuCb(const sensor_msgs::Imu::ConstPtr& msg)
@@ -58,12 +64,15 @@ void TestInsInitAccObs::imuCb(const sensor_msgs::Imu::ConstPtr& msg)
 
 void TestInsInitAccObs::feedImu(const ImuPacket& packet)
 {
-  ROS_DEBUG_STREAM("ts: " << packet.t_
-       << "\t acc: " << packet.acc_.transpose()
-       << "\t gyr: " << packet.gyr_.transpose());
-
   // 1. coarse init
-
+  if(!coarse_init_->done())
+  {
+    if(coarse_init_->init(packet))
+    {
+      ROS_DEBUG_STREAM("Coarse init done.");
+      R_n_b_ = coarse_init_->getR();
+    }
+  }
 
   // 2. fine init
 
