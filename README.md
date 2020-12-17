@@ -16,10 +16,11 @@ I have tested this on Arch Linux and should run out of the box on any Linux base
 - Build
 
 ```bash
+  mkdir -p ins_ws/src
+  cd ins_ws/src 
   git clone git@github.com:kvmanohar22/ins_init.git
-  cd ins_init/build
-  cmake ..
-  make
+  cd ..
+  catkin_make
 ```
 
 - Usage
