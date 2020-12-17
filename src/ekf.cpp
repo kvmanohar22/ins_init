@@ -12,14 +12,26 @@ EKF::EKF(size_t dim_x,
   t_(0.0)
 {
   // set the correct dimensions for states  
-  x_.resize(dim_x_);
-  P_.resize(dim_x_, dim_x_);  
+  x_.resize(dim_x_); x_.setZero();
+  P_.resize(dim_x_, dim_x_); P_.setZero();
+  P0_.resize(dim_x_, dim_x_); P0_.setZero();
   
   F_.resize(dim_x_, dim_x_);  
-  G_.resize(dim_x_, dim_w_);  
   H_.resize(dim_z_, dim_x_);  
-  Q_.resize(dim_w_, dim_w_);  
   R_.resize(dim_z_, dim_z_);  
+
+  F_.setZero();
+  H_.setZero();
+  R_.setZero();
+
+  if(dim_w_ > 0)
+  {
+    G_.resize(dim_x_, dim_w_);
+    Q_.resize(dim_w_, dim_w_);
+
+    G_.setZero();
+    Q_.setZero();
+  }
 }
 
 void EKF::propagateState()
@@ -31,7 +43,10 @@ void EKF::propagateState()
 void EKF::propagateCovariance()
 {
   const MatrixNd phi = getStateTransition();
-  P_ = phi * P_ * phi.transpose() + G_ * Q_ * G_.transpose();
+  P_ = phi * P_ * phi.transpose();
+
+  if(dim_w_ > 0)
+    P_ += G_ * Q_ * G_.transpose();
 }
 
 void EKF::predict(const double dt)

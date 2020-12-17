@@ -24,6 +24,14 @@ public:
   inline MatrixNd getStateCov() const { return P_; }
   inline MatrixNd getFisherInformation() const { return P_.inverse(); }
 
+  inline MatrixNd& P() { return P_; }
+  inline MatrixNd& F() { return F_; }
+  inline MatrixNd& G() { return G_; }
+  inline MatrixNd& H() { return H_; }
+  inline MatrixNd& Q() { return Q_; }
+  inline MatrixNd& R() { return R_; }
+  inline MatrixNd& P0() { return P0_; }
+
   /// propagates state
   void propagateState();
 
@@ -40,13 +48,20 @@ public:
   virtual VectorNd getObservationError(const VectorNd& z) =0;
 
   /// Needs to be implemented. Either discrete/continuous propagation of covariance
-  virtual void update(const double t, const VectorNd& obs_error) =0;
+  virtual void update(const double t, const VectorNd& z) =0;
+
+  /// set times
+  void inline setInitTime(const double t) { prev_t_ = t; t0_ = t; }
+
+  /// reset the state
+  void inline resetState() { x_.setZero(); }
 
 protected:
   size_t dim_x_;  //!< dimension of state 
   size_t dim_w_;  //!< dimension of noise 
   size_t dim_z_;  //!< dimension of observations 
-  double t_;      //!< current time
+  double prev_t_; //!< current time
+  double t_;      //!< current time. WARNING: This is not epoch time!
   double t0_;     //!< initial time
 
   VectorNd x_;    //!< state of the system

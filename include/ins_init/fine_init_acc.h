@@ -1,6 +1,7 @@
 #ifndef _INS_INIT_FINE_INIT_ACC_H_
 #define _INS_INIT_FINE_INIT_ACC_H_
 
+#include "ins_init/global.h"
 #include "ins_init/ekf.h"
 
 namespace ins_init
@@ -18,9 +19,9 @@ public:
   {
     // since earth angular velocity is of the order of 1e-5, 
     // it is approximated to zero and first order approximation
-    // gives identity matrix 
-    MatrixNd I; I.setIdentity();
-    return I; 
+    // gives identity matrix
+    MatrixNd I(dim_x_, dim_x_); I.setIdentity();
+    return I;
   }
 
   virtual VectorNd getObservationError(const VectorNd& z) override
@@ -31,26 +32,31 @@ public:
     return z;
   }
 
-  virtual void update(const double t, const VectorNd& obs_error) override
+  virtual void update(const double t, const VectorNd& z) override
   {
+    // get observation error
+    VectorNd obs_error = getObservationError(z);
+
     // reset the state
     x_.setZero();
 
-    // propagate covariance
-    const double dt = t_ - t; 
+    // propagate covariance.
+    const double dt = t - prev_t_;
     const double delta_t = t - t0_; 
-    const double g2 = G*G; 
+    const double g2 = GR*GR;
     P_(0,0) = (R_(0,0)/(g2*delta_t/dt))*(1.0/(1.0 + (R_(0,0)*dt)/(g2*delta_t*P0_(0,0))));
     P_(1,1) = (R_(1,1)/(g2*delta_t/dt))*(1.0/(1.0 + (R_(1,1)*dt)/(g2*delta_t*P0_(1,1))));
     P_(2,2) = P0_(2,2);
 
     // kalman gain 
-    MatrixNd K(dim_x_, dim_z_);
-    K = P_*H_.transpose()*(R_ + H_*P_*H_.transpose()).inverse(); 
+    MatrixNd K = P_*H_.transpose()*(R_ + H_*P_*H_.transpose()).inverse();
  
     // update state
     // WARNING: This state will be reset before next update. 
     x_ = x_ + K * obs_error; 
+
+    // update time
+    prev_t_ = t;
   }
 
 }; // class FineInitAcc
