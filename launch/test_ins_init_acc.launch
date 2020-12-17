@@ -1,12 +1,13 @@
 <launch>
     <arg name="imu_topic" default="/mavros/imu/data_raw"/>
-    <arg name="bag_path" default="assets/imu_test_00.bag"/>
+    <arg name="bag_path" default="$(find ins_init)/assets/imu_test_00.bag"/>
 
     <!-- start rosbag -->
     <node type="play" name="rosbag" pkg="rosbag" args="$(arg bag_path)"/>
 
     <!-- start node -->
-    <node type="ins_ins_init_acc" name="test_ins_init_acc" pkg="ins_init">
+    <env name="ROSCONSOLE_CONFIG_FILE" value="$(find ins_init)/cfg/rosconsole.conf"/>
+    <node type="test_ins_init_acc" name="test_ins_init_acc" pkg="ins_init" output="screen">
       <param name="imu_topic" value="$(arg imu_topic)"/> 
     </node> 
 </launch>

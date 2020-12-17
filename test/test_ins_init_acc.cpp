@@ -49,8 +49,8 @@ void TestInsInitAccObs::imuCb(const sensor_msgs::Imu::ConstPtr& msg)
 {
   ROS_INFO_STREAM_ONCE("Imu callback started.");
 
-  Vector3d omg(msg->angular_velocity);
-  Vector3d acc(msg->linear_acceleration);
+  Vector3d omg(msg->angular_velocity.x, msg->angular_velocity.y, msg->angular_velocity.z);
+  Vector3d acc(msg->linear_acceleration.x, msg->linear_acceleration.y, msg->linear_acceleration.z);
   ImuPacket packet(
       omg, acc, msg->header.stamp.toSec());
   feedImu(packet);
@@ -60,8 +60,7 @@ void TestInsInitAccObs::feedImu(const ImuPacket& packet)
 {
   ROS_DEBUG_STREAM("ts: " << packet.t_
        << "\t acc: " << packet.acc_.transpose()
-       << "\t gyr: " << packet.gyr_.transpose()
-       << "\n");
+       << "\t gyr: " << packet.gyr_.transpose());
 
   // 1. coarse init
 
@@ -78,6 +77,7 @@ int main(int argc, char** argv)
 {
   ros::init(argc, argv, "ins_init");
 
+  ROS_INFO_STREAM("Starting ins_init node");
   ros::NodeHandle nh;
   TestInsInitAccObs estimator(nh);
   while(ros::ok() && !estimator.quit())
