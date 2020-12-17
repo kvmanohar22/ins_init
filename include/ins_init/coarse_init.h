@@ -34,9 +34,9 @@ private:
 bool CoarseInit::init(const ImuPacket& pkt)
 {
   Matrix3d T;
-  T << 0.0, 0.0, -G,
+  T << 0.0, 0.0, -GR,
        WE*cos(phi_), 0.0, -WE*sin(phi_),
-       0.0, G*WE*cos(phi_), 0.0;
+       0.0, GR*WE*cos(phi_), 0.0;
 
   // angular velocity of body wrt inertial frame in body frame
   Vector3d w_i_b = pkt.gyr_;
