@@ -47,6 +47,7 @@ private:
   double            prev_t_;
   double            t0_;
   std::ofstream     ofs_;
+  bool              start_;
 }; // class TestInsInitAccObs
 
 TestInsInitAccObs::TestInsInitAccObs(ros::NodeHandle& nh)
@@ -54,7 +55,8 @@ TestInsInitAccObs::TestInsInitAccObs(ros::NodeHandle& nh)
     quit_(false),
     rate_(1000),
     prev_t_(0.0),
-    t0_(0.0)
+    t0_(0.0),
+    start_(false)
 {
   imu_sub_ = nh_.subscribe("/mavros/imu/data_raw", 1000, &TestInsInitAccObs::imuCb, this);
   coarse_init_ = new CoarseInit(60.0);
@@ -81,7 +83,9 @@ void TestInsInitAccObs::writeLog(const double t, Vector3d& rpy, Matrix3d& P)
        << P(0,0) << "," << P(1,1) << ","<< P(2,2) << ","
        << rpy[0] << "," << rpy[1] << ","<< rpy[2] << "\n";
 
-  ROS_DEBUG_STREAM_THROTTLE(1.0, "cov = " << P(0,0) << " " << P(1,1) << " " << P(2,2));
+  ROS_DEBUG_STREAM_THROTTLE(1.0,
+      "cov = " << P(0,0) << " " << P(1,1) << " " << P(2,2) << "\t"
+      "rpy = " << rpy[0] << " " << rpy[1] << " " << rpy[2]);
 }
 
 TestInsInitAccObs::~TestInsInitAccObs()
@@ -126,6 +130,18 @@ void TestInsInitAccObs::imuCb(const sensor_msgs::Imu::ConstPtr& msg)
 
 void TestInsInitAccObs::feedImu(const ImuPacket& packet)
 {
+  // 0. skip some initial readings
+  ROS_INFO_STREAM_ONCE("Skipping 2s worth of data.");
+  if(!start_)
+  {
+    t0_ = packet.t_;
+    start_ = true;
+    return;
+  } else {
+    if((packet.t_ - t0_) < 2.0)
+      return;
+  }
+
   // 1. coarse init
   if(!coarse_init_->done())
   {
@@ -137,7 +153,7 @@ void TestInsInitAccObs::feedImu(const ImuPacket& packet)
       fine_init_->setInitTime(packet.t_); 
 
       Matrix3d cov = fine_init_->getStateCov();
-      Vector3d rpy = dcm2rpy(R_n_b_) * 180 / PI;
+      Vector3d rpy = dcm2rpy(R_n_b_);
       writeLog(0.0, rpy, cov);
     }
     prev_t_ = packet.t_;
