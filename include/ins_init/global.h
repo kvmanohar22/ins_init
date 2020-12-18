@@ -24,6 +24,7 @@ namespace ins_init
 
   typedef Eigen::Matrix<double, 3, 3> Matrix3d;
   typedef Eigen::Matrix<double, 3, 1> Vector3d;
+  typedef Eigen::Matrix<double, 2, 1> Vector2d;
 
   typedef Eigen::Matrix<double, Eigen::Dynamic, 1> VectorNd;
   typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> MatrixNd;

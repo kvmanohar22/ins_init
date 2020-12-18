@@ -15,10 +15,14 @@ def save_plot(xlabel, ylabel):
 
 def plot(path):
     data = np.loadtxt(open(path), delimiter=",", skiprows=1)
+    data = data[:500, :] 
     t = data[:, 0]
-    plt.plot(t, data[:, 1], label='$\sigma_{\psi_{N}}$')
-    plt.plot(t, data[:, 2], label='$\sigma_{\psi_{E}}$')
-    plt.plot(t, data[:, 3], label='$\sigma_{\psi_{D}}$')
+    # plt.plot(t, data[:, 1], label='$\sigma_{\psi_{N}}$')
+    # plt.plot(t, data[:, 2], label='$\sigma_{\psi_{E}}$')
+    # plt.plot(t, data[:, 3], label='$\sigma_{\psi_{D}}$')
+    plt.plot(t, data[:, 4], label='roll')
+    plt.plot(t, data[:, 5], label='pitch')
+    plt.plot(t, data[:, 6], label='yaw')
     save_plot('time (sec)', 'degrees')
 
 if __name__ == '__main__':
