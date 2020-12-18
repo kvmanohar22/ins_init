@@ -3,11 +3,13 @@
 #include "ins_init/imu.h"
 #include "ins_init/utils.h"
 
+#include <ios>
 #include <ros/init.h>
 #include <ros/node_handle.h>
 #include <ros/rate.h>
 #include <ros/ros.h>
 #include <sensor_msgs/Imu.h>
+#include <fstream>
 
 namespace ins_init
 {
@@ -32,6 +34,8 @@ public:
   inline bool quit() const { return quit_; }
   inline ros::Rate rate() const { return rate_; }
 
+  void writeLog(const double t, Vector3d& rpy, Matrix3d& P);
+
 private:
   Matrix3d          R_n_b_;       //!< Estimated rotation matrix from (b)ody frame to (n)ED frame
   ros::NodeHandle   nh_;
@@ -41,37 +45,63 @@ private:
   CoarseInit*       coarse_init_;
   FineInitAcc*      fine_init_;
   double            prev_t_;
+  double            t0_;
+  std::ofstream     ofs_;
 }; // class TestInsInitAccObs
 
 TestInsInitAccObs::TestInsInitAccObs(ros::NodeHandle& nh)
   : nh_(nh),
     quit_(false),
     rate_(1000),
-    prev_t_(0.0)
+    prev_t_(0.0),
+    t0_(0.0)
 {
   imu_sub_ = nh_.subscribe("/mavros/imu/data_raw", 1000, &TestInsInitAccObs::imuCb, this);
   coarse_init_ = new CoarseInit(60.0);
   fine_init_ = new FineInitAcc(3, 0, 3);
 
   initKF();
+
+  // open file for writing debug data and add header
+  ofs_.open("/tmp/ins_init.csv");
+  ofs_ << "time" << ","
+       << "cov00" << "," << "cov11" << ","<< "cov22" << ","
+       << "roll" << "," << "pitch" << "," << "yaw" << "\n";
+}
+
+void TestInsInitAccObs::writeLog(const double t, Vector3d& rpy, Matrix3d& P)
+{
+  // convert to degrees
+  rpy = rpy * 180/PI;
+  P(0,0) = sqrt(P(0,0)) * 180 / PI;
+  P(1,1) = sqrt(P(1,1)) * 180 / PI;
+  P(2,2) = sqrt(P(2,2)) * 180 / PI;
+
+  ofs_ << t << ","
+       << P(0,0) << "," << P(1,1) << ","<< P(2,2) << ","
+       << rpy[0] << "," << rpy[1] << ","<< rpy[2] << "\n";
+
+  ROS_DEBUG_STREAM_THROTTLE(1.0, "cov = " << P(0,0) << " " << P(1,1) << " " << P(2,2));
 }
 
 TestInsInitAccObs::~TestInsInitAccObs()
 {
+  ofs_.close();
   delete coarse_init_;
   delete fine_init_;
 }
 
 void TestInsInitAccObs::initKF()
 {
-  const double radian_1 = PI/180.0; 
-  fine_init_->P()(0,0) = radian_1;
-  fine_init_->P()(1,1) = radian_1;
-  fine_init_->P()(2,2) = radian_1;
-  
-  fine_init_->P0()(0,0) = radian_1;
-  fine_init_->P0()(1,1) = radian_1;
-  fine_init_->P0()(2,2) = radian_1;
+  const double deg1 = PI/180.0;
+  const double init_var_sq = deg1*deg1;
+  fine_init_->P()(0,0) = init_var_sq;
+  fine_init_->P()(1,1) = init_var_sq;
+  fine_init_->P()(2,2) = init_var_sq;
+
+  fine_init_->P0()(0,0) = init_var_sq;
+  fine_init_->P0()(1,1) = init_var_sq;
+  fine_init_->P0()(2,2) = init_var_sq;
 
   const double phi = 60. * PI / 180.0;
   fine_init_->F() = ins_init::sqew(Vector3d(-WE*cos(phi), 0.0, WE*sin(phi)));
@@ -105,9 +135,14 @@ void TestInsInitAccObs::feedImu(const ImuPacket& packet)
       R_n_b_ = coarse_init_->getR();
       ROS_DEBUG_STREAM("Estimated RPY (degree) = " << dcm2rpy(R_n_b_).transpose()*180.0/PI);
       fine_init_->setInitTime(packet.t_); 
+
+      Matrix3d cov = fine_init_->getStateCov();
+      Vector3d rpy = dcm2rpy(R_n_b_) * 180 / PI;
+      writeLog(0.0, rpy, cov);
     }
     prev_t_ = packet.t_;
-    return; 
+    t0_ = packet.t_;
+    return;
   }
 
   // 2. fine init
@@ -130,8 +165,11 @@ void TestInsInitAccObs::feedImu(const ImuPacket& packet)
   // for computing dt
   prev_t_ = packet.t_;
 
-  MatrixNd cov = fine_init_->getStateCov();
-  ROS_DEBUG_STREAM_THROTTLE(1.0, "cov = " << cov(0,0) << " " << cov(1,1) << " " << cov(2,2)); 
+  Matrix3d cov = fine_init_->getStateCov();
+
+  // write to file
+  Vector3d rpy = ins_init::dcm2rpy(R_n_b_);
+  writeLog(packet.t_ - t0_, rpy, cov);
 }
 
 } // namespace ins_init
