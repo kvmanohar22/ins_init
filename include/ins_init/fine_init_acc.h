@@ -3,6 +3,7 @@
 
 #include "ins_init/global.h"
 #include "ins_init/ekf.h"
+#include <cmath>
 
 namespace ins_init
 {
@@ -36,6 +37,8 @@ public:
   {
     // get observation error
     VectorNd obs_error = getObservationError(z);
+    if(obs_error.hasNaN())
+      ROS_WARN_STREAM_THROTTLE(2.0, "Nan detected in observation error: " << obs_error.transpose());
 
     // reset the state
     x_.setZero();
@@ -50,10 +53,15 @@ public:
 
     // kalman gain 
     MatrixNd K = P_*H_.transpose()*(R_ + H_*P_*H_.transpose()).inverse();
+    if(K.hasNaN())
+      ROS_WARN_STREAM_THROTTLE(2.0, "Nan detected in Kalman Gain.");
  
     // update state
     // WARNING: This state will be reset before next update. 
     x_ = x_ + K * obs_error; 
+
+    if(x_.hasNaN())
+      ROS_WARN_STREAM_THROTTLE(2.0, "Nan detected in state.");
 
     // update time
     prev_t_ = t;

@@ -11,6 +11,8 @@
 #include <iostream>
 #include <chrono>
 
+#include <ros/ros.h>
+
 namespace ins_init
 {
   using namespace std;
