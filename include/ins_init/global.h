@@ -18,9 +18,9 @@ namespace ins_init
   using namespace std;
   using namespace Eigen;
 
-  static constexpr float PI = 3.1415926535;  //!< pi
-  static constexpr float GR = 9.780327;      //!< gravity vector magnitude
-  static constexpr float WE = 7.292115e-5;   //!< angular velocity of earth [rad/s]
+  static constexpr double PI = 3.1415926535;  //!< pi
+  static constexpr double GR = 9.780327;      //!< gravity vector magnitude
+  static constexpr double WE = 7.292115e-5;   //!< angular velocity of earth [rad/s]
 
   typedef Eigen::Matrix<double, 3, 3> Matrix3d;
   typedef Eigen::Matrix<double, 3, 1> Vector3d;

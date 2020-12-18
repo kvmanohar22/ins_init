@@ -3,6 +3,7 @@
 
 #include "ins_init/global.h"
 #include "ins_init/imu.h"
+#include "ins_init/utils.h"
 
 namespace ins_init
 {
@@ -44,7 +45,7 @@ bool CoarseInit::init(const ImuPacket& pkt)
   // acceleration in body frame
   Vector3d a_b = pkt.acc_;
 
-  Matrix3d M; M << a_b.transpose(), w_i_b.transpose(), -(a_b.cross(w_i_b)).transpose();
+  Matrix3d M; M << a_b.transpose(), w_i_b.transpose(), (sqew(w_i_b)*a_b).transpose();
   R_n_b_ = T.inverse() * M;
   done_ = true;
 
