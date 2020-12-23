@@ -1,8 +1,6 @@
 # INS initialization
 This repository implements the solution to Inertial Navigation System (INS) initialization. More precisely, the system estimates `roll` and `pitch` angles in addition to accelerometer and gyroscope biases (additionally `yaw` angle if magnetometer data is provided) so as to align the gravity vector direction along the local NED frame. The estimation occurs in two phases: coarse initialization followed by fine initialization. An Extended Kalman Filter (EKF) is used for fine initialization.
 
-For mathematical treatment of the problem, head over to [blog post](https://kvmanohar22.github.io/ins_init).
-
 ## Dependencies
 - Eigen 3.4+
 - ROS melodic
@@ -45,4 +43,18 @@ if you have live stream of data. You might want to change ROS topic names in `la
 ```bash
   roslaunch ins_init test_ins_init_acc.launch imu_topic:=<imu topic>
 ```
+
+## Experiments
+This was done using the data provided under `assets` directory which was collected using pixhawk 2.4.6 flight controller. The method estimates only `roll` and `pitch` angles with input being accelerometer data. Use of velocity observations will yield better results (to be implemented). Following plots show the evolution of covariance and the state (`roll` and `pitch`) itself.
+
+<div class="fig figcenter fighighlight">
+  <img src="assets/imu_test_00_covariance.png" width=49% style="margin-right:1px;">
+  <img src="assets/imu_test_00_attitude.png" width=49%>
+</div>
+
+## TODO
+- [x] Acceleration observations
+- [ ] Velocity observations (which estimates imu biases as well)
+- [ ] Estimation of yaw
+- [ ] Detailed Blog on estimation
 
