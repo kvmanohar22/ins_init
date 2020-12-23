@@ -3,12 +3,13 @@
 from matplotlib import rc
 import matplotlib.pyplot as plt
 import numpy as np
+plt.style.use('ggplot')
 
 rc('font', **{'family':'serif', 'serif':['Cardo']})
 rc('text', usetex=True)
 
 def save_plot(xlabel, ylabel):
-    plt.legend()
+    plt.legend(loc=1)
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
     plt.show()
