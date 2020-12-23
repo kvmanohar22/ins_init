@@ -34,19 +34,27 @@ private:
 
 bool CoarseInit::init(const ImuPacket& pkt)
 {
-  Matrix3d T;
-  T << 0.0, 0.0, -GR,
-       WE*cos(phi_), 0.0, -WE*sin(phi_),
-       0.0, GR*WE*cos(phi_), 0.0;
+  const double ax = pkt.acc_.x();
+  const double ay = pkt.acc_.y();
+  const double az = pkt.acc_.z();
 
-  // angular velocity of body wrt inertial frame in body frame
-  Vector3d w_i_b = pkt.gyr_;
+  const double roll = atan2(ay, az);
+  const double pitch = atan2(ax, sqrt(pow(ay, 2) + pow(az, 2)));
 
-  // acceleration in body frame
-  Vector3d a_b = pkt.acc_;
+  const double cos_roll = cos(roll);
+  const double sin_roll = sin(roll);
+  const double sin_pitch = sin(pitch);
 
-  Matrix3d M; M << a_b.transpose(), w_i_b.transpose(), (sqew(w_i_b)*a_b).transpose();
-  R_n_b_ = T.inverse() * M;
+
+  // NOTE: unless a magnetometer is used, this estimate will remain unobserved
+  const double yaw = atan2(
+     -pkt.gyr_.y() * cos_roll + pkt.gyr_.z() * sin_roll,
+      pkt.gyr_.x() * cos(pitch) + pkt.gyr_.y() * sin_pitch * sin_roll + pkt.gyr_.z() * sin_pitch * cos_roll);
+  ROS_INFO_STREAM("RPY = " << roll << " " << pitch << " " << yaw);
+  R_n_b_ = rz(-yaw) * ry(-pitch) * rx(-roll);
+
+  Vector3d rpy = dcm2rpy(R_n_b_);
+  ROS_INFO_STREAM("RPY = " << rpy[0] << " " << rpy[1] << " " << rpy[2]);
   done_ = true;
 
   return true;

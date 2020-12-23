@@ -54,6 +54,42 @@ inline Vector3d dcm2rpy(const Matrix3d& R)
   return rpy;
 }
 
+// roll angle
+inline Matrix3d rx(const double r)
+{
+  const double cos_r = cos(r);
+  const double sin_r = sin(r);
+  Matrix3d R;
+  R << 1.0,    0.0,   0.0,
+       0.0,  cos_r, sin_r,
+       0.0, -sin_r, cos_r;
+  return R;
+}
+
+// pitch angle
+inline Matrix3d ry(const double p)
+{
+  const double cos_p = cos(p);
+  const double sin_p = sin(p);
+  Matrix3d R;
+  R <<  cos_p, 0.0, -sin_p,
+          0.0, 1.0,    0.0,
+        sin_p, 0.0,  cos_p;
+  return R;
+}
+
+// yaw angle
+inline Matrix3d rz(const double y)
+{
+  const double cos_y = cos(y);
+  const double sin_y = sin(y);
+  Matrix3d R;
+  R << cos_y, sin_y, 0.0,
+      -sin_y, cos_y, 0.0,
+         0.0,   0.0, 1.0;
+  return R;
+}
+
 } // namespace ins_init
 
 #endif // _INS_INIT_UTILS_H_
