@@ -2,7 +2,7 @@
 This repository implements the solution to Inertial Navigation System (INS) initialization. More precisely, the system estimates `roll` and `pitch` angles in addition to accelerometer and gyroscope biases (additionally `yaw` angle if magnetometer data is provided) so as to align the gravity vector direction along the local NED frame. The estimation occurs in two phases: coarse initialization followed by fine initialization. An Extended Kalman Filter (EKF) is used for fine initialization.
 
 ## Dependencies
-- Eigen 3.4+
+- Eigen 3.2+
 - ROS melodic
 - numpy (optional)
 - matplotlib (optional)
