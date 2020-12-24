@@ -48,8 +48,15 @@ if you have live stream of data. You might want to change ROS topic names in `la
 This was done using the data provided under `assets` directory which was collected using pixhawk 2.4.6 flight controller. The method estimates only `roll` and `pitch` angles with input being accelerometer data. Use of velocity observations will yield better results (to be implemented). Following plots show the evolution of covariance and the state (`roll` and `pitch`) itself.
 
 <div class="fig figcenter fighighlight">
-  <img src="assets/imu_test_00_covariance.png" width=49% style="margin-right:1px;">
-  <img src="assets/imu_test_00_attitude.png" width=49%>
+  <img src="assets/imu_test_00_covariance.png">
+</div>
+
+<div class="fig figcenter fighighlight">
+  <img src="assets/imu_test_00_roll.png">
+</div>
+
+<div class="fig figcenter fighighlight">
+  <img src="assets/imu_test_00_pitch.png">
 </div>
 
 ## TODO
