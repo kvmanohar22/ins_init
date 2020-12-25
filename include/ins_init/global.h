@@ -1,6 +1,7 @@
 #ifndef _INS_INIT_GLOBAL_H_
 #define _INS_INIT_GLOBAL_H_
 
+#include <Eigen/Core>
 #include <Eigen/StdVector>
 #include <Eigen/Dense>
 
@@ -23,6 +24,7 @@ namespace ins_init
   static constexpr double WE = 7.292115e-5;   //!< angular velocity of earth [rad/s]
 
   typedef Eigen::Matrix<double, 3, 3> Matrix3d;
+  typedef Eigen::Matrix<double, 2, 2> Matrix2d;
   typedef Eigen::Matrix<double, 3, 1> Vector3d;
   typedef Eigen::Matrix<double, 2, 1> Vector2d;
 
