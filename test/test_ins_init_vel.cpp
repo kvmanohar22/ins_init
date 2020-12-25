@@ -221,6 +221,12 @@ void TestInsInitVelObs::feedImu(const ImuPacket& packet)
   fine_init_->closeVelocityLoop(state.tail(2));           /* velocity */
   fine_init_->closeGyroBiasLoop(state.block(3, 0, 3, 1)); /* bias     */
 
+  // re-normalize attitude
+  // ROS_DEBUG_STREAM("rtr(before) = " << R_n_b_.transpose() * R_n_b_);
+  // Eigen::Quaterniond q(R_n_b_); q.normalize();
+  // R_n_b_ = q.toRotationMatrix();
+  ROS_DEBUG_STREAM("rtr(after) = " << R_n_b_.transpose() * R_n_b_);
+
   // 2.4: reset state
   fine_init_->resetState(); 
 
