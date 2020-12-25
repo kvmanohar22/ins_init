@@ -46,3 +46,6 @@ TARGET_LINK_LIBRARIES(ins_init ${LINK_LIBS})
 ADD_EXECUTABLE(test_ins_init_acc test/test_ins_init_acc.cpp)
 TARGET_LINK_LIBRARIES(test_ins_init_acc ins_init)
 
+ADD_EXECUTABLE(test_ins_init_vel test/test_ins_init_vel.cpp)
+TARGET_LINK_LIBRARIES(test_ins_init_vel ins_init)
+

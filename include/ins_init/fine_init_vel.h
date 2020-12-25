@@ -14,7 +14,10 @@ class FineInitVel final : public EKF
 public:
   FineInitVel(size_t dim_x, size_t dim_w, size_t dim_z) :
     EKF(dim_x, dim_w, dim_z)
-  {}
+  {
+    vel_.setZero();
+    bias_.setZero();
+  }
   virtual ~FineInitVel() {}
 
   inline Vector2d getVelocity() const { return vel_; }
@@ -44,15 +47,18 @@ public:
 
   virtual MatrixNd getStateTransition() override
   {
-    MatrixNd phi;
-    // TODO
-
+    // since earth angular velocity is of the order of 1e-5,
+    // it is approximated to zero and first order approximation
+    // gives identity matrix
+    MatrixNd phi(dim_x_, dim_x_); phi.setIdentity();
     return phi;
   }
 
   virtual VectorNd getObservationError(const VectorNd& z) override
   {
-    // TODO
+    // we are assuming the platform to be stationary
+    // and this error is the difference between estimated velocity
+    // and horizontal velocity of system (which is presumed zero)
     return z;
   }
 
@@ -66,8 +72,17 @@ public:
     // reset the state
     x_.setZero();
 
+    // covariance propagation
+    const double dt = t - prev_t_;
+    Eigen::MatrixXd I(8,8); I.setIdentity();
+    MatrixNd phi; phi.noalias() = I - F_ * dt;
+    MatrixNd fisher_info; fisher_info.noalias() =
+      phi.transpose() * P_.inverse() * phi + H_.transpose() * R_.inverse() * H_ * dt;
+    P_.noalias() = fisher_info.inverse();
+
     // TODO: kalman gain 
     MatrixNd K;
+    K.noalias() = P_ * H_.transpose() * (R_ + H_*P_*H_.transpose()).inverse();
     if(K.hasNaN())
       ROS_WARN_STREAM_THROTTLE(2.0, "Nan detected in Kalman Gain.");
  

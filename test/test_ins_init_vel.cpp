@@ -35,7 +35,7 @@ public:
   inline bool quit() const { return quit_; }
   inline ros::Rate rate() const { return rate_; }
 
-  void writeLog(const double t, Vector3d& rpy, Matrix3d& P);
+  void writeLog(const double t, Vector3d& rpy, MatrixNd& P);
 
 private:
   Matrix3d          R_n_b_;       //!< Estimated rotation matrix from (b)ody frame to (n)ED frame
@@ -75,7 +75,7 @@ TestInsInitVelObs::TestInsInitVelObs(ros::NodeHandle& nh)
        << "vN" << "," << "vE" << "\n";                         /* horizontal velocity in NED frame */
 }
 
-void TestInsInitVelObs::writeLog(const double t, Vector3d& rpy, Matrix3d& P)
+void TestInsInitVelObs::writeLog(const double t, Vector3d& rpy, MatrixNd& P)
 {
   // convert to degrees
   rpy = rpy * 180/PI;
@@ -133,7 +133,7 @@ void TestInsInitVelObs::initKF()
 
   // observation 
   fine_init_->H().topRightCorner(2, 2) = Matrix2d::Identity();
- 
+
   // dynamic matrix 
   const double phi = 28.0 * PI / 180.0;
   const double r = 6371000; 
@@ -190,7 +190,7 @@ void TestInsInitVelObs::feedImu(const ImuPacket& packet)
       ROS_DEBUG_STREAM("Estimated RPY (degree) = " << dcm2rpy(R_n_b_).transpose()*180.0/PI);
       fine_init_->setInitTime(packet.t_); 
 
-      Matrix3d cov = fine_init_->getStateCov();
+      MatrixNd cov = fine_init_->getStateCov();
       Vector3d rpy = dcm2rpy(R_n_b_);
       writeLog(0.0, rpy, cov);
     }
@@ -215,9 +215,9 @@ void TestInsInitVelObs::feedImu(const ImuPacket& packet)
   fine_init_->update(packet.t_, vel);
 
   // 2.3: update nominal state
-  Vector3d dx = fine_init_->getState();
   const VectorNd state = fine_init_->getState();
-  R_n_b_ = ins_init::getRotationMatrix(dx) * R_n_b_;      /* attitude */
+  const Vector3d d_theta =  state.block(0, 0, 3, 1);
+  R_n_b_ = ins_init::getRotationMatrix(d_theta) * R_n_b_; /* attitude */
   fine_init_->closeVelocityLoop(state.tail(2));           /* velocity */
   fine_init_->closeGyroBiasLoop(state.block(3, 0, 3, 1)); /* bias     */
 
@@ -228,7 +228,7 @@ void TestInsInitVelObs::feedImu(const ImuPacket& packet)
   prev_t_ = packet.t_;
 
   // write to file
-  Matrix3d cov = fine_init_->getStateCov();
+  MatrixNd cov = fine_init_->getStateCov();
   Vector3d rpy = ins_init::dcm2rpy(R_n_b_);
   writeLog(packet.t_ - t0_, rpy, cov);
 }
