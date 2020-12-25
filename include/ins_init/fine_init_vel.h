@@ -80,7 +80,7 @@ public:
       phi.transpose() * P_.inverse() * phi + H_.transpose() * R_.inverse() * H_ * dt;
     P_.noalias() = fisher_info.inverse();
 
-    // TODO: kalman gain 
+    // kalman gain
     MatrixNd K;
     K.noalias() = P_ * H_.transpose() * (R_ + H_*P_*H_.transpose()).inverse();
     if(K.hasNaN())
